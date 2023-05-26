@@ -1,0 +1,15 @@
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+
+path = "C:\Vero (E)  Dye (Belskaya)"
+
+import os
+
+for filename in os.listdir(path):
+    if filename.endswith(".lsm"):
+        print(os.path.join(path, filename))
