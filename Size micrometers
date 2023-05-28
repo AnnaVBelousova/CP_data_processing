@@ -5,11 +5,54 @@ import seaborn as sns # для таблиц
 from statannotations.Annotator import Annotator # считает достоверности
 import matplotlib.pyplot as plt #для дизайна графиков
 from itertools import combinations
-
-path = "C:\Vero (E)  Dye (Belskaya)"
-
+import javabridge
+import bioformats
+import numpy as np
+import matplotlib.pyplot as plt
+from xml.dom.minidom import parse
+import xml.dom.minidom
+import win32clipboard as clipboard
+from tkinter import filedialog
+import cv2
+import pandas as pd
+import tkinter as tk
+import tkinter.filedialog as fd
 import os
+from xml.dom.minidom import Node
+from xml.etree import ElementTree as ET
+from xml.dom import minidom
 
-for filename in os.listdir(path):
-    if filename.endswith(".lsm"):
-        print(os.path.join(path, filename))
+path = "C:\\Users\\Arteys\\Desktop\\Anya_work\\Insulin_Alexa_488_Glucagon_TexasRed"
+javabridge.start_vm(class_path=bioformats.JARS)
+
+
+df = pd.DataFrame(columns=['adress', 'size, micrometer'])
+for address, dirs, files in os.walk(path): # выдает строку с адресом последней папки(address), название всех папок(dirs), название файлов
+    for file in files:
+        if ".lsm" in str(file):
+            filename = os.path.join(address,str(file))
+            
+           # print(filename)    
+
+    #image, scale = bioformats.load_image(path, rescale=False, wants_max_intensity=True)
+            metadata_raw = bioformats.get_omexml_metadata(filename)
+
+
+            DOMTree = xml.dom.minidom.parseString(metadata_raw)
+
+
+# Get the Pixels element
+            pixels_element = DOMTree.getElementsByTagName("Pixels")[0]
+
+# Get the value of PhysicalSizeX attribute
+            physical_size_x = pixels_element.getAttribute("PhysicalSizeX")
+            #physical_size_y = pixels_element.getAttribute("PhysicalSizeY")
+
+# Print the value of PhysicalSizeX
+            # Добавляем первую колонку со значениями pandas
+            df = df.append({'adress': filename, 'size, micrometer': physical_size_x}, ignore_index=True)
+print(df)
+            
+javabridge.kill_vm()
+
+df.to_csv('C:\\Users\\Arteys\\Desktop\\Anya_work\\CSV.csv', index=False)
