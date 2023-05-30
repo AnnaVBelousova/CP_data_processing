@@ -24,14 +24,28 @@ from xml.dom import minidom
 
 path = "C:\\Users\\Arteys\\Desktop\\Anya_work\\Insulin_Alexa_488_Glucagon_TexasRed"
 javabridge.start_vm(class_path=bioformats.JARS)
+def path_to_group_name(dir_adress): # ссылка на таблицу
+    index_list = []
+    # print(dir_adress)
+    for index,value in enumerate(dir_adress): # проходим все символы в ссылке
+        if value == "/":
+            index_list.append(index)
+    
+    index_group_start,index_group_end = index_list[-3],index_list[-2] # вручную смотрим на индексы и вписываем
+    index_sample_start,index_sample_end = index_list[-2],index_list[-1] #
 
+    group_name = dir_adress[index_group_start+1:index_group_end] # выводим символы  между слешами из ссылки
+    sample_name = dir_adress[index_sample_start+1:index_sample_end] # 
+    return group_name,sample_name 
 
-df = pd.DataFrame(columns=['adress', 'size, micrometer'])
+df = pd.DataFrame(columns=['adress', 'size, micrometer', 'Group', 'Sample'])
+
 for address, dirs, files in os.walk(path): # выдает строку с адресом последней папки(address), название всех папок(dirs), название файлов
     for file in files:
         if ".lsm" in str(file):
             filename = os.path.join(address,str(file))
-            
+            correct_path = filename.replace("\\","/")
+            group_name,sample_name = path_to_group_name(correct_path)
            # print(filename)    
 
     #image, scale = bioformats.load_image(path, rescale=False, wants_max_intensity=True)
@@ -50,9 +64,9 @@ for address, dirs, files in os.walk(path): # выдает строку с адр
 
 # Print the value of PhysicalSizeX
             # Добавляем первую колонку со значениями pandas
-            df = df.append({'adress': filename, 'size, micrometer': physical_size_x}, ignore_index=True)
+            df = df.append({'adress': filename, 'size, micrometer': physical_size_x, 'Group': group_name, "Sample": sample_name}, ignore_index=True)
 print(df)
             
 javabridge.kill_vm()
 
-df.to_csv('C:\\Users\\Arteys\\Desktop\\Anya_work\\CSV.csv', index=False)
+df.to_csv('C:\\Users\\Arteys\\Desktop\\Anya_work\\CSV2.csv', index=False)
