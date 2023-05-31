@@ -1,0 +1,21 @@
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+path_dir = "D:\В работу!" # ссылка на самую верхнюю папку
+
+
+df = pd.DataFrame()
+
+for address, dirs, files in os.walk(path_dir):
+    for file in files:
+        if "MyExpt_Image" in str(file):
+            full_path = os.path.join(address, file) # добавляет файл к адресу
+            correct_path = full_path.replace("\\","/") 
+            df = df.append(pd.read_csv(full_path, usecols=['URL_Image', 'FileName_Image'], encoding='windows-1251'))
+            print(df)
+            
+            df.to_excel('D:\В работу3.xlsx', index=False)
