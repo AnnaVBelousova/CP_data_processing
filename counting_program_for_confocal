@@ -1,0 +1,167 @@
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+import javabridge
+import bioformats
+import numpy as np
+import matplotlib.pyplot as plt
+
+path_dir = "C:\\Users\\Arteys\\Desktop\\Anya_work\\Insulin_Alexa_488_Glucagon_TexasRed" # ссылка на самую верхнюю папку
+#Эта часть кода выводит название группы и образца из ссылки на таблицу
+def path_to_group_name(dir_adress): # ссылка на таблицу
+    index_list = []
+    # print(dir_adress)
+    for index,value in enumerate(dir_adress): # проходим все символы в ссылке
+        if value == "/":
+            index_list.append(index)
+    
+    index_group_start,index_group_end = index_list[-3],index_list[-2] # вручную смотрим на индексы и вписываем
+    index_sample_start,index_sample_end = index_list[-2],index_list[-1] #
+
+    group_name = dir_adress[index_group_start+1:index_group_end] # выводим символы  между слешами из ссылки
+    sample_name = dir_adress[index_sample_start+1:index_sample_end] # 
+    return group_name,sample_name 
+    
+    #для одного образца создается таблица с нужными колонками 
+def Get_data (correct_path,group_name,sample_name):
+    islet_data_df_i = pd.read_csv(correct_path, encoding='cp1251') # читает csv как таблицу
+    data_i = islet_data_df_i[['ImageNumber','AreaShape_Area', 'Children_Islet_nucleus_Count','Children_Object_Glucagon_wo_double_stain_Count',
+                              'Children_Object_Insulin_Glucagon_Nuclei_Count',
+                              'Children_Object_Insulin_wo_double_stain_Count']].copy() # берем  колонки из большой таблицы
+    data_i['Group'] = group_name # добавили к колонкам data_i колонку "группа" и заполнили данными(название группы) 
+    data_i['Sample'] = sample_name
+   
+    return(data_i)
+    
+    #обрабатываем другую таблицу
+def Get_data_2 (correct_path,group_name,sample_name):
+    islet_data_df_i = pd.read_csv(correct_path, encoding='cp1251') # читает csv как таблицу
+    data_i = islet_data_df_i[['ImageNumber','URL_Image']].copy() # берем  колонки из большой таблицы
+    data_i['Group'] = group_name # добавили к колонкам data_i колонку "группа" и заполнили данными(название группы) 
+    data_i['Sample'] = sample_name
+   
+    return(data_i)
+    
+    empty_data = {'ImageNumber':[], 'AreaShape_Area':[], 'Children_Islet_nucleus_Count':[], 'Children_Object_Glucagon_wo_double_stain_Count':[], 
+              'Children_Object_Insulin_Glucagon_Nuclei_Count' :[], 'Children_Object_Insulin_wo_double_stain_Count' :[],'Group':[],'Sample':[]} # это словарь. Заголовок и содержание
+Number_of_nucleus_df = pd.DataFrame(empty_data) # из словаря сделали таблицу. пустая 
+
+empty_data_2 = {'ImageNumber':[],'URL_Image':[],'Group':[],'Sample':[]} # это словарь. Заголовок и содержание
+Number_of_nucleus_df_2 = pd.DataFrame(empty_data_2) # из словаря сделали таблицу. пустая 
+
+
+#Берем нужный файл, применяем к нему функцию, которая делает таблицу с данными и добавляем эти данные в большую таблицу
+for address, dirs, files in os.walk(path_dir): # выдает строку с адресом последней папки(address), название всех папок(dirs), название файлов
+    for file in files:
+        if ".csv" in str(file):
+            full_path = os.path.join(address, file) # добавляет файл к адресу
+            correct_path = full_path.replace("\\","/")
+            group_name,sample_name = path_to_group_name(correct_path)
+
+
+            if "MyExpt_Islets" in str(file):
+                # print(group_name,sample_name)
+                Result = Get_data(correct_path,group_name,sample_name)# из таблицы MyExpt_Islet вытаскиваем нужные данные для каждого образца 
+                
+                Number_of_nucleus_df = pd.concat([Number_of_nucleus_df,Result],axis=0) # добавляем данные для каждого образца в общую пустую таблицу
+        
+            if "MyExpt_Image" in str(file):
+                # print(group_name,sample_name)
+                Result = Get_data_2(correct_path,group_name,sample_name)# из таблицы MyExpt_Image вытаскиваем нужные данные для каждого образца 
+                
+                Number_of_nucleus_df_2 = pd.concat([Number_of_nucleus_df_2,Result],axis=0) # добавляем данные для каждого образца в общую пустую таблицу    
+                
+                
+                Number_of_nucleus_df = Number_of_nucleus_df.rename(columns={'AreaShape_Area':'Area,px','Children_Islet_nucleus_Count':'Nucleus_all',
+                                                             'Children_Object_Glucagon_wo_double_stain_Count':'Glucagon',  
+                                                             'Children_Object_Insulin_Glucagon_Nuclei_Count': 'Insulin_Glucagon',
+                                                              'Children_Object_Insulin_wo_double_stain_Count':'Insulin' })
+
+
+# Number_of_nucleus_df['Glucagon_part'] = Number_of_nucleus_df['Glucagon'] / Number_of_nucleus_df['Nucleus_all'] *100
+# Number_of_nucleus_df['Insulin_part'] = Number_of_nucleus_df['Insulin'] / Number_of_nucleus_df['Nucleus_all'] *100
+# Number_of_nucleus_df['Insulin_Glucagon_part'] = Number_of_nucleus_df['Insulin_Glucagon'] / Number_of_nucleus_df['Nucleus_all'] *100
+
+#print(Number_of_nucleus_df, Number_of_nucleus_df_2)
+
+#Соединяем таблицы по общим столбцам
+Number_of_nucleus_df_2['URL_Image'] = Number_of_nucleus_df_2['URL_Image'].str.replace('file:///', '') #для того, чтобы значения в столбцах двух таблиц были одинаковыми
+
+merged_table = pd.merge(Number_of_nucleus_df, Number_of_nucleus_df_2, on=['ImageNumber', 'Group', 'Sample'])
+
+micrometers = pd.read_csv('C:\\Users\\Arteys\\Desktop\\Anya_work\\micrometers.csv')
+
+# переименование столбца
+micrometers = micrometers.rename(columns={'PathName_Image': 'URL_Image'})
+
+# сохранение измененной таблицы 
+micrometers.to_csv('C:\\Users\\Arteys\\Desktop\\Anya_work\\micrometers.csv', index=False)
+micrometers.to_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\micrometers.xlsx', index=False)
+
+#делаем одинаковые значения в столбце с адресом, по которому объединяем две таблицы
+from urllib.parse import unquote
+
+for i in range(len(merged_table)):
+    merged_table['URL_Image'][i] = unquote(merged_table['URL_Image'][i].replace('/', '\\'))
+    #print(merged_table['URL_Image'][i])
+merged_table.to_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\merged_table.xlsx', index = False)          
+#merged_table.to_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\merged_table.xlsx', index=False)
+total_t = pd.merge(merged_table, micrometers[['URL_Image', 'size, micrometer']], on='URL_Image', how='left')
+
+
+#вычисляем нужные параметры
+total_t['islet_sqwere'] = total_t['Area,px']*total_t['size, micrometer']*total_t['size, micrometer']
+total_t['Insulin_Glucagon cells per islet square, cells/um^2'] = total_t['Insulin_Glucagon']/total_t['islet_sqwere']
+total_t['Insulin cells per islet square, cells/um^2'] = total_t['Insulin']/total_t['islet_sqwere']
+total_t['Glucagon cells per islet square,cells/um^2'] = total_t['Glucagon']/total_t['islet_sqwere']
+total_t['Cellularity, cells/um^2'] = total_t['Nucleus_all']/total_t['islet_sqwere']
+print(total_t)
+total_t.to_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\таблица с микрометрами3.xlsx', index=False)
+
+
+#Статистика
+unique_group= Number_of_nucleus_df['Group'].unique() # достаем уникальные названия групп. unique() выдает список
+pairs_1 = []
+# print(unique_group)
+
+for group1, group2 in combinations(unique_group, 2):
+    pairs_1.append(((group1),(group2)))
+    # print(pairs_1)
+
+def function_statistic(data, column):
+    fig, axs = plt.subplots()
+    sns.barplot(data = data, x = 'Group', y = column, order = ["Intact","30_days","60_days","STZ-AFG"])
+
+    annotator = Annotator(axs, pairs_1, data=data, x = 'Group', y = column)
+    annotator.configure(test='Kruskal', text_format='star', loc='inside', comparisons_correction=None)
+
+    annotator.apply_and_annotate()
+
+# function_statistic(total_t,'Glucagon_part')
+# function_statistic(total_t,'Insulin_part')
+# function_statistic(total_t,'Insulin_Glucagon_part')
+# function_statistic(total_t,'Ins_Gluc_part_from_insulin')
+# function_statistic(total_t,'Ins_Gluc_part_from_glucagon')
+
+function_statistic(total_t,'Insulin_Glucagon cells per islet square, cells/um^2')
+function_statistic(total_t,'Insulin cells per islet square, cells/um^2')
+function_statistic(total_t,'Glucagon cells per islet square,cells/um^2')
+function_statistic(total_t,'Cellularity, cells/um^2')
+
+#plt.style.use('dark_background')
+plt.style.use('default')
+plt.rcParams['figure.facecolor'] = (1, 1, 1)
+
+#plt.savefig('myplot.png', transparent=False)
+plt.show()
