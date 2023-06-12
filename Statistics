@@ -1,0 +1,40 @@
+import pandas as pd # извлекаем панду  
+
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+import pandas as pd # извлекаем панду  
+
+
+
+
+
+
+#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TNF-a.xlsx')
+#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TNF-a_gomogenat.xlsx')
+#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\IFN-g.xlsx')
+#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\IFN-g_gomogenat.xlsx')
+#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TGF-b.xlsx')
+df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TGF-b_gomogenat.xlsx')
+# print(df)
+
+
+#Статистика
+# unique_group= df['Group'].unique() # достаем уникальные названия групп. unique() выдает список
+unique_group = ["Intact","Intact+AFG","30_days","60_days","STZ-AFG"]
+unique_group = ["Intact","30_days","60_days","STZ-AFG"]
+pairs_1 = []
+# print(unique_group)
+
+for group1, group2 in combinations(unique_group, 2):
+    pairs_1.append(((group1),(group2)))
+    print(pairs_1)
+
+axs = sns.barplot(data=df)
+
+annotator = Annotator(axs, pairs_1, data=df)
+annotator.configure(test='Kruskal', text_format='star', loc='inside', comparisons_correction=None)
+annotator.apply_and_annotate()
+
+plt.show()
