@@ -11,30 +11,55 @@ import pandas as pd # извлекаем панду
 
 
 
-#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TNF-a.xlsx')
-#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TNF-a_gomogenat.xlsx')
-#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\IFN-g.xlsx')
-#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\IFN-g_gomogenat.xlsx')
-#df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TGF-b.xlsx')
-df = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TGF-b_gomogenat.xlsx')
+TNFa = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TNF-a.xlsx')
+TNFa_gomogenat = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TNF-a_gomogenat.xlsx')
+IFNg = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\IFN-g.xlsx')
+IFNg_gomogenat = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\IFN-g_gomogenat.xlsx')
+TGFb = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TGF-b.xlsx')
+TGFb_gomogenat = pd.read_excel('C:\\Users\\Arteys\\Desktop\\Anya_work\\TGF-b_gomogenat.xlsx')
+
+lst = [TNFa, TNFa_gomogenat, IFNg, IFNg_gomogenat, TGFb, TGFb_gomogenat ]
+names = ['TNFa', 'TNFa_gomogenat', 'IFNg', 'IFNg_gomogenat', 'TGFb', 'TGFb_gomogenat' ]
 # print(df)
 
 
 #Статистика
-# unique_group= df['Group'].unique() # достаем уникальные названия групп. unique() выдает список
-unique_group = ["Intact","Intact+AFG","30_days","60_days","STZ-AFG"]
+
+unique_group_2 = ["Intact","Intact+AFG","30_days","60_days","STZ-AFG"]
 unique_group = ["Intact","30_days","60_days","STZ-AFG"]
-pairs_1 = []
+def Pairs (lst):
+    pairs_1 = []
+    for group1, group2 in combinations(unique_group, 2):
+        pairs_1.append(((group1),(group2)))
+        # print(pairs_1)
+
+    return pairs_1
+
 # print(unique_group)
+def Statistica(pairs, interleikin_lst):
 
-for group1, group2 in combinations(unique_group, 2):
-    pairs_1.append(((group1),(group2)))
-    print(pairs_1)
+    i = 0
+    for interleikin in interleikin_lst:
 
-axs = sns.barplot(data=df)
+        plt.figure() # добавляем эту строку 
+        axs = sns.barplot(data=interleikin, ci=25)
 
-annotator = Annotator(axs, pairs_1, data=df)
-annotator.configure(test='Kruskal', text_format='star', loc='inside', comparisons_correction=None)
-annotator.apply_and_annotate()
+        annotator = Annotator(axs, pairs, data=interleikin)
+        annotator.configure(test='Kruskal', text_format='star', loc='inside', comparisons_correction=None)
+        annotator.apply_and_annotate()
 
-plt.show()
+        filename = "C:\\Users\\Arteys\\Desktop\\Anya_work\\" +  names[i] + ".png"
+        i=i+1
+
+
+        plt.savefig(filename) 
+        plt.show()
+
+
+#pairs = Pairs(unique_group)
+Statistica(Pairs(unique_group), lst)
+# Statistica(Pairs(unique_group), TNFa_gomogenat)
+# Statistica(Pairs(unique_group), IFNg)
+# Statistica(Pairs(unique_group), IFNg_gomogenat)
+# Statistica(Pairs(unique_group), TGFb)
+# Statistica(Pairs(unique_group), TGFb_gomogenat)
