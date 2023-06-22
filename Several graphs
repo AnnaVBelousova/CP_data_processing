@@ -1,0 +1,47 @@
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+#import javabridge
+#import bioformats
+import numpy as np
+import matplotlib.pyplot as plt
+
+table = pd.read_excel('D:\\DATA\\Tables\\таблица с микрометрами3.xlsx')
+unique_group = table['Group'].unique()
+pairs_1 = []
+
+for group1, group2 in combinations(unique_group, 2):
+    pairs_1.append(((group1),(group2)))
+
+fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(12, 4))
+
+
+sns.barplot(data=table, x='Group', y='Insulin cells per islet square, cells/mm^2', order=["Intact","30_days","60_days","DM-ADFN"], ci=25, ax=axs[0])
+sns.barplot(data=table, x='Group', y='Glucagon cells per islet square,cells/mm^2', order=["Intact","30_days","60_days","DM-ADFN"], ci=25, ax=axs[1])
+sns.barplot(data=table, x='Group', y='Insulin_Glucagon cells per islet square, cells/mm^2', order=["Intact","30_days","60_days","DM-ADFN"], ci=25, ax=axs[2])
+
+annotator2 = Annotator(axs[0], pairs_1, data=table, x='Group', y='Insulin cells per islet square, cells/mm^2')
+annotator2.configure(test='Mann-Whitney', text_format='star', loc='inside', comparisons_correction=None)
+annotator2.apply_and_annotate()
+
+annotator3 = Annotator(axs[1], pairs_1, data=table, x='Group', y='Glucagon cells per islet square,cells/mm^2')
+annotator3.configure(test='Mann-Whitney', text_format='star', loc='inside', comparisons_correction=None)
+annotator3.apply_and_annotate()
+
+annotator1 = Annotator(axs[2], pairs_1, data=table, x='Group', y='Insulin_Glucagon cells per islet square, cells/mm^2')
+annotator1.configure(test='Mann-Whitney', text_format='star', loc='inside', comparisons_correction=None)
+annotator1.apply_and_annotate()
+
+plt.tight_layout()
+plt.show()
