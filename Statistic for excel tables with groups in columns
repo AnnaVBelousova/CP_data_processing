@@ -1,0 +1,56 @@
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+import pandas as pd # извлекаем панду  
+import os # для работы с файлами
+import re # для регулярных выражений
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+#import javabridge
+#import bioformats
+import numpy as np
+import matplotlib.pyplot as plt
+#Статистика
+table =  pd.read_excel('D:\\DATA\\Tables\\таблица с микрометрами3.xlsx')
+unique_group= table['Group'].unique() # достаем уникальные названия групп. unique() выдает список
+pairs_1 = []
+#print(unique_group)
+
+for group1, group2 in combinations(unique_group, 2):
+    pairs_1.append(((group1),(group2)))
+#print(pairs_1)
+
+def function_statistic(data, column):
+
+    fig, axs = plt.subplots()
+  
+
+    sns.barplot(data = data, x = 'Group', y = column, order = ["Intact","30_days","60_days","DM-ADFN"], ci = 25)
+
+    annotator = Annotator(axs, pairs_1, data=data, x = 'Group', y = column)
+    annotator.configure(test='Mann-Whitney', text_format='star', loc='inside', comparisons_correction=None)
+
+    annotator.apply_and_annotate()
+    
+  
+
+function_statistic(table,'Insulin_Glucagon cells per islet square, cells/mm^2')
+function_statistic(table,'Insulin cells per islet square, cells/mm^2')
+function_statistic(table,'Glucagon cells per islet square,cells/mm^2')
+function_statistic(table,'Cellularity, cells/mm^2')
+
+
+
+#plt.style.use('dark_background')
+plt.style.use('default')
+plt.rcParams['figure.facecolor'] = (1, 1, 1)
+
+#plt.savefig('myplot.png', transparent=False)
+#plt.tight_layout()
+plt.show()
