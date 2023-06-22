@@ -1,0 +1,49 @@
+import pandas as pd # извлекаем панду  
+
+import seaborn as sns # для таблиц
+from statannotations.Annotator import Annotator # считает достоверности
+import matplotlib.pyplot as plt #для дизайна графиков
+from itertools import combinations
+import pandas as pd # извлекаем панду  
+
+
+
+Opt_dens = pd.read_excel('D:\\DATA\\Tables\\таблица с микрометрами3.xlsx')
+
+print(Opt_dens)
+
+lst = [Opt_dens]
+names = ["Opt_dens"]
+#Статистика
+
+unique_group = ["Intact","30_days","60_days","STZ-AFG"]
+def Pairs (lst):
+    pairs_1 = []
+    for group1, group2 in combinations(unique_group, 2):
+        pairs_1.append(((group1),(group2)))
+        # print(pairs_1)
+
+    return pairs_1
+
+# print(unique_group)
+def Statistica(pairs, interleikin_lst):
+
+    i = 0
+    for interleikin in interleikin_lst:
+
+        plt.figure() # чтобы не сливались
+        axs = sns.barplot(data=interleikin, ci=25)
+
+        annotator = Annotator(axs, pairs, data=interleikin)
+        annotator.configure(test='Kruskal', text_format='star', loc='inside', comparisons_correction=None)
+        annotator.apply_and_annotate()
+
+        filename = "'D:\\" +  names[i] + ".png"
+        i=i+1
+
+
+        # plt.savefig(filename) 
+        plt.show()
+
+
+Statistica(Pairs(unique_group), lst)
