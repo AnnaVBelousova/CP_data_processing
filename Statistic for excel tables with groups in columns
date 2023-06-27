@@ -17,7 +17,37 @@ from itertools import combinations
 import numpy as np
 import matplotlib.pyplot as plt
 #Статистика
-table =  pd.read_excel('D:\\DATA\\Tables\\таблица с микрометрами3.xlsx')
+table =  pd.read_excel('D:\\DATA\\Tables\\Общая таблица с изменениями для презентации — копия.xlsx')
+
+df = pd.DataFrame(table)
+
+# удаляем выбросы
+q_low = df['Avarage_islet_sqware, mm^2'].quantile(0.05)
+q_high = df['Avarage_islet_sqware, mm^2'].quantile(0.95)
+df = df[(df['Avarage_islet_sqware, mm^2'] > q_low) & (df['Avarage_islet_sqware, mm^2'] < q_high)] 
+
+q_low = df['Cellularity, cells/mm^2'].quantile(0.05)
+q_high = df['Cellularity, cells/mm^2'].quantile(0.95)
+df = df[(df['Cellularity, cells/mm^2'] > q_low) & (df['Avarage_islet_sqware, mm^2'] < q_high)] 
+
+q_low = df['Glucagon cells per islet square,cells/mm^2'].quantile(0.05)
+q_high = df['Glucagon cells per islet square,cells/mm^2'].quantile(0.95)
+df = df[(df['Glucagon cells per islet square,cells/mm^2'] > q_low) & (df['Avarage_islet_sqware, mm^2'] < q_high)] 
+
+q_low = df['Insulin cells per islet square, cells/mm^2'].quantile(0.05)
+q_high = df['Insulin cells per islet square, cells/mm^2'].quantile(0.95)
+df = df[(df['Insulin cells per islet square, cells/mm^2'] > q_low) & (df['Avarage_islet_sqware, mm^2'] < q_high)]
+
+q_low = df['Insulin_Glucagon cells per islet square, cells/mm^2'].quantile(0.05)
+q_high = df['Insulin_Glucagon cells per islet square, cells/mm^2'].quantile(0.95)
+df = df[(df['Insulin_Glucagon cells per islet square, cells/mm^2'] > q_low) & (df['Avarage_islet_sqware, mm^2'] < q_high)]
+
+
+
+
+
+# выводим датафрейм без выбросов
+print(df)
 unique_group= table['Group'].unique() # достаем уникальные названия групп. unique() выдает список
 pairs_1 = []
 #print(unique_group)
@@ -31,7 +61,7 @@ def function_statistic(data, column):
     fig, axs = plt.subplots()
   
 
-    sns.barplot(data = data, x = 'Group', y = column, order = ["Intact","30_days","60_days","DM-ADFN"], ci = 25)
+    sns.barplot(data = data, x = 'Group', y = column, order = ["Intact","DM_30 days","DM_60 days","DM+AFG"], ci = 65)
 
     annotator = Annotator(axs, pairs_1, data=data, x = 'Group', y = column)
     annotator.configure(test='Mann-Whitney', text_format='star', loc='inside', comparisons_correction=None)
@@ -44,6 +74,8 @@ function_statistic(table,'Insulin_Glucagon cells per islet square, cells/mm^2')
 function_statistic(table,'Insulin cells per islet square, cells/mm^2')
 function_statistic(table,'Glucagon cells per islet square,cells/mm^2')
 function_statistic(table,'Cellularity, cells/mm^2')
+function_statistic(table,'Avarage_islet_sqware, mm^2')
+
 
 
 
