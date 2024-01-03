@@ -1,0 +1,34 @@
+import pandas as pd
+
+#read text file into pandas DataFrame
+#def calculate_mean(group, column_data):
+df = pd.read_excel ('F:\группированная_таблица.xlsx')
+    #meanvalue = df.groupby('group')["column_data"].mean()
+    #df['name'] = df['group'].map(meanvalue)
+    # Вычисляем среднее арифметическое по группам
+   = df.groupby('Sample')['Insulin_Glucagon cells per islet square, cells/mm^2'].mean()
+
+df["meanvalue insulin_glucagon"] = df['Sample'].map(среднее_значение)
+
+df.to_excel('F:\группированная_таблица2.xlsx', index = False)
+
+df2 = pd.read_excel ('F:\группированная_таблица2.xlsx')
+
+среднее_значение_2 = df2.groupby('Sample')['Insulin cells per islet square, cells/mm^2'].mean()
+
+df2["meanvalue insulin"] = df2['Sample'].map(среднее_значение_2)
+df2.to_excel('F:\группированная_таблица3.xlsx', index = False)
+
+df3 = pd.read_excel ('F:\группированная_таблица3.xlsx')
+
+среднее_значение_3 = df3.groupby('Sample')['Glucagon cells per islet square,cells/mm^2'].mean()
+df3["meanvalue glucagon"] = df3['Sample'].map(среднее_значение_3)
+df3.to_excel('F:\группированная_таблица4.xlsx', index = False)
+
+df4 = pd.read_excel ('F:\группированная_таблица4.xlsx')
+
+среднее_значение_4 = df4.groupby('Sample')['Cellularity, cells/mm^2'].mean()
+df4["meanvalue cellularity"] = df4['Sample'].map(среднее_значение_4)
+df4.to_excel('F:\группированная_таблица5.xlsx', index = False)
+
+
